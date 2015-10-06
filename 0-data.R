@@ -6,15 +6,16 @@ source("0-helper.R")
 Sys.setenv(tz = "UTC")
 
 
-price <- read_excel("SwissAirAktie.xls", skip = 1, na = "#N/A N/A",col_types = c("date","numeric","numeric","numeric")) %>% as.data.frame
-price <- xts(price[,-1], as.Date(price[,1]))
-colnames(price) <- c("Last", "Last_Actual", "Mid")
+price_ <- read_excel("SwissAirAktie.xls", skip = 1, na = "#N/A N/A",col_types = c("date","numeric","numeric","numeric")) %>% as.data.frame
+price_ <- xts(price_[,-1], as.Date(price_[,1]))
+colnames(price_) <- c("Last", "Last_Actual", "Mid")
+price <- price$Last
 
 returns <- price %>%
            xts2df %>%
            transmute(time = .[,"time"],
-                     continuous = ROC(.[,"Last"]),
-                     discrete = ROC(.[,"Last"], type = "discrete")) %>%
+                     continuous = ROC(.),
+                     discrete = ROC(., type = "discrete")) %>%
            na.omit %>%
            df2xts
            
