@@ -28,8 +28,7 @@ empirical <- function(q=99.9E-2) {
   function(prices) {
     returns <- prices %>% ROC(type = "discrete") %>% na.omit
     price_today <- prices[length(prices)]
-    returns %>% head %>% print
-    - (price_today * returns) %>% quantile(1 - q)
+    (-price_today * returns) %>% quantile(q)
   }
 }
 
@@ -52,11 +51,16 @@ evaluate_model <- function(model, lookback="1 year") {
 
 ## ---- Work with models
 
-delta_normal_var <- evaluate_model(delta_normal(90E-2),"3 years")
+delta_normal_var <- evaluate_model(delta_normal(99E-2),"3 years")
 
-empirical_var <- evaluate_model(empirical())
+empirical_var <- evaluate_model(empirical(99E-2))
 
 delta_normal_var %>% chartSeries
 (delta_normal_var/price) %>% chartSeries
 
-empirical_var %>% chartSeries
+
+empirical_var_1 <- evaluate_model(empirical(99E-2))
+empirical_var_3 <- evaluate_model(empirical(99E-2),"3 years")
+empirical_var_1 %>% chartSeries
+empirical_var_3 %>% chartSeries
+(empirical_var/price) %>% chartSeries
