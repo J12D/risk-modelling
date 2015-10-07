@@ -26,21 +26,25 @@ delta_normal <- function(q=99.9E-2) {
 
 empirical <- function(q=99.9E-2) {
   function(prices) {
+    stopifnot(all(sapply(prices,function(x)!is.na(x))))
     returns <- prices %>% ROC(type = "discrete") %>% na.omit
-    price_today <- prices[length(prices)]
-    (-price_today * returns) %>% quantile(q)
+    price_today <- prices[length(prices)] %>% as.numeric
+    stopifnot(!is.na(price_today))
+    stopifnot(all(!is.na(returns)))
+    val_changes <- price_today * returns
+    stopifnot(all(!is.na(val_changes)))
+    -(stats::quantile(val_changes, 1 - q))
   }
 }
 
 
 ## ---- Model evaluation
 
-evaluate_model <- function(model, lookback="1 year") {
-  vars <- index(price) %>%
-    .[-1] %>%
+evaluate_model <- function(model, lookback="4 quarters") {
+  vars <- index(price)[-(1:200)] %>%
     lapply(function(date)price[paste0("/",date)]) %>%
     lapply(function(prices) {
-      date <- prices %>% index %>% .[length(prices)] %>% as.Date
+      date <- index(prices)[length(prices)] %>% as.Date
       prices <- prices %>% xts::last(lookback)
       val <- model(prices)
       xts(val, date)
@@ -51,16 +55,15 @@ evaluate_model <- function(model, lookback="1 year") {
 
 ## ---- Work with models
 
-delta_normal_var <- evaluate_model(delta_normal(99E-2),"3 years")
+delta_normal_var <- evaluate_model(delta_normal(99E-2))
+
+delta_normal_var %>% plotXTS
+(delta_normal_var/price) %>% plotXTS
+
 
 empirical_var <- evaluate_model(empirical(99E-2))
 
-delta_normal_var %>% chartSeries
-(delta_normal_var/price) %>% chartSeries
+empirical_var %>% plotXTS
+(empirical_var/price) %>% plotXTS
 
-
-empirical_var_1 <- evaluate_model(empirical(99E-2))
-empirical_var_3 <- evaluate_model(empirical(99E-2),"3 years")
-empirical_var_1 %>% chartSeries
-empirical_var_3 %>% chartSeries
-(empirical_var/price) %>% chartSeries
+merge.xts((empirical_var/price), (delta_normal_var/price)) %>% plotXTS

@@ -10,6 +10,7 @@ price_ <- read_excel("SwissAirAktie.xls", skip = 1, na = "#N/A N/A",col_types = 
 price_ <- xts(price_[,-1], as.Date(price_[,1]))
 colnames(price_) <- c("Last", "Last_Actual", "Mid")
 price <- price_$Last
+price %<>% na.omit
 
 returns <- xts(NULL)
 returns$continuous <- ROC(price)
