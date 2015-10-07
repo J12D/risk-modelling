@@ -13,7 +13,8 @@ qplot(returns %>% as.vector, geom = "histogram", xlim = c(-0.25,0.25), binwidth 
 ## ---- Delta-Normal
 
 delta_normal <- function(q=99.9E-2) {
-  function(returns) {
+  function(prices) {
+    returns <- prices %>% ROC %>% na.omit
     mu <- mean(returns)
     sigma <- sd(returns)
     qnorm(q, mu, sigma)
@@ -24,22 +25,23 @@ delta_normal <- function(q=99.9E-2) {
 ## ---- Empirical
 
 empirical <- function(q=99.9E-2) {
-  function(returns) {
+  function(prices) {
+    returns <- prices %>% diff %>% na.omit
     -returns %>% quantile(q)
-  } 
+  }
 }
 
 
 ## ---- Model evaluation
 
-evaluate_model <- function(model, lookback="1 month") {
+evaluate_model <- function(model, lookback="1 year") {
   vars <- index(price) %>%
     .[-1] %>%
     lapply(function(date)price[paste0("/",date)]) %>%
     lapply(function(prices) {
       date <- prices %>% index %>% .[length(prices)] %>% as.Date
-      returns <- prices %>% xts::last(lookback) %>% ROC %>% na.omit
-      val <- model(returns)
+      prices <- prices %>% xts::last(lookback)
+      val <- model(prices)
       xts(val, date)
     }) %>%
     Reduce(rbind,.)
@@ -48,9 +50,9 @@ evaluate_model <- function(model, lookback="1 month") {
 
 ## ---- Work with models
 
-delta_normal_var <- evaluate_model(delta_normal(),"1 year")
+delta_normal_var <- evaluate_model(delta_normal(90E-2),"2 years")
 
 empirical_var <- evaluate_model(empirical())
 
-delta_normal_var['1999/'] %>% chartSeries
-empirical_var['1999/'] %>% chartSeries
+delta_normal_var %>% chartSeries
+empirical_var %>% chartSeries
