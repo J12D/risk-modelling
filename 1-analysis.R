@@ -14,10 +14,10 @@ qplot(returns %>% as.vector, geom = "histogram", xlim = c(-0.25,0.25), binwidth 
 
 delta_normal <- function(q=99.9E-2) {
   function(prices) {
-    returns <- prices %>% ROC %>% na.omit
-    mu <- mean(returns)
-    sigma <- sd(returns)
-    qnorm(q, mu, sigma)
+    returns <- prices %>% ROC(type = "discrete") %>% na.omit
+    mu <- returns %>% mean
+    sigma <- returns %>% sd
+    -(prices[length(prices)]) * qnorm(1 - q, mu, sigma)
   }
 }
 
@@ -26,8 +26,10 @@ delta_normal <- function(q=99.9E-2) {
 
 empirical <- function(q=99.9E-2) {
   function(prices) {
-    returns <- prices %>% diff %>% na.omit
-    -returns %>% quantile(q)
+    returns <- prices %>% ROC(type = "discrete") %>% na.omit
+    price_today <- prices[length(prices)]
+    returns %>% head %>% print
+    - (price_today * returns) %>% quantile(1 - q)
   }
 }
 
@@ -50,9 +52,11 @@ evaluate_model <- function(model, lookback="1 year") {
 
 ## ---- Work with models
 
-delta_normal_var <- evaluate_model(delta_normal(90E-2),"2 years")
+delta_normal_var <- evaluate_model(delta_normal(90E-2),"3 years")
 
 empirical_var <- evaluate_model(empirical())
 
 delta_normal_var %>% chartSeries
+(delta_normal_var/price) %>% chartSeries
+
 empirical_var %>% chartSeries
