@@ -38,10 +38,10 @@ empirical <- function(q=99.9E-2) {
 
 evt <- function(q=99.9E-2) {
   function(prices) {
-    returns <- prices %>% ROC(type = "discrete") %>% na.omit
+    losses <- prices %>% ROC(type = "discrete") %>% na.omit %>% -.
     n <- round(length(prices) * (1 - (q - 1E-2)), 0)
-    t <- findthresh(returns, n)
-    GPD <- gpd(returns, threshold = t, method = c("ml"), information = c("observed"))
+    t <- findthresh(losses, n)
+    GPD <- gpd(losses, threshold = t, method = c("ml"), information = c("observed"))
     (prices[length(prices)]) * riskmeasures(GPD, q)[,"quantile"]
   }
 }
@@ -75,7 +75,7 @@ empirical_var %>% plotXTS
 (empirical_var/price) %>% plotXTS
 
 
-evt_var <- evaluate_model(evt(99E-2),"5 years",800)
+evt_var <- evaluate_model(evt(99E-2), "4 years", 800)
 
 evt_var %>% plotXTS
 (evt_var/price) %>% plotXTS
