@@ -42,32 +42,20 @@ delta_normal <- function(q=99.9E-2) {
 empirical <- function(q=99.9E-2) {
   function(prices) {
     returns <- prices %>% ROC(type = "discrete") %>% na.omit
-    price_today <- prices[length(prices)] %>% as.numeric
-    val_changes <- price_today * returns
-    -(stats::quantile(val_changes, 1 - q))
+    price_today <- prices[length(prices)]
+    (-price_today * returns) %>% quantile(q)
   }
 }
 
-
-## ---- Extreme Value Theory
-
-evt <- function(q=99.9E-2) {
-  function(prices) {
-    losses <- prices %>% ROC(type = "discrete") %>% na.omit %>% -.
-    n <- round(length(prices) * (1 - (q - 1E-2)), 0)
-    t <- findthresh(losses, n)
-    GPD <- gpd(losses, threshold = t, method = c("ml"), information = c("observed"))
-    (prices[length(prices)]) * riskmeasures(GPD, q)[,"quantile"]
-  }
-}
 
 ## ---- Model evaluation
 
-evaluate_model <- function(model, lookback="4 quarters", skip=200) {
-  vars <- index(price)[-(1:skip)] %>%
+evaluate_model <- function(model, lookback="1 year", skip = 200) {
+  vars <- index(price) %>%
+    .[-(1:skip)] %>%
     lapply(function(date)price[paste0("/",date)]) %>%
     lapply(function(prices) {
-      date <- index(prices)[length(prices)] %>% as.Date
+      date <- prices %>% index %>% .[length(prices)] %>% as.Date
       prices <- prices %>% xts::last(lookback)
       val <- model(prices)
       xts(val, date)
@@ -78,10 +66,10 @@ evaluate_model <- function(model, lookback="4 quarters", skip=200) {
 
 ## ---- Work with models
 
-delta_normal_var <- evaluate_model(delta_normal(99E-2))
+delta_normal_var <- evaluate_model(delta_normal(99E-2),"3 years")
 
-delta_normal_var %>% plotXTS
-(delta_normal_var/price) %>% plotXTS
+delta_normal_var %>% chartSeries
+(delta_normal_var/price) %>% chartSeries
 
 
 empirical_var <- evaluate_model(empirical(99E-2))
@@ -97,8 +85,10 @@ evt_var %>% plotXTS
 
 garch_var <- evaluate_model(garch(99E-2), "4 years", 800)
 
+
 garch_var %>% plotXTS
 (garch_var/price) %>% plotXTS
+
 
 vars <- merge.xts((evt_var/price), (empirical_var/price), (delta_normal_var/price))
 colnames(vars) <- c("EVT", "Historical", "DeltaNormal")
