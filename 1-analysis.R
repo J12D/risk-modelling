@@ -26,22 +26,30 @@ delta_normal <- function(q=99.9E-2) {
 
 empirical <- function(q=99.9E-2) {
   function(prices) {
-    stopifnot(all(sapply(prices,function(x)!is.na(x))))
     returns <- prices %>% ROC(type = "discrete") %>% na.omit
     price_today <- prices[length(prices)] %>% as.numeric
-    stopifnot(!is.na(price_today))
-    stopifnot(all(!is.na(returns)))
     val_changes <- price_today * returns
-    stopifnot(all(!is.na(val_changes)))
     -(stats::quantile(val_changes, 1 - q))
   }
 }
 
 
+## ---- Extreme Value Theory
+
+evt <- function(q=99.9E-2) {
+  function(prices) {
+    returns <- prices %>% ROC(type = "discrete") %>% na.omit
+    n <- round(length(prices) * (1 - (q - 1E-2)), 0)
+    t <- findthresh(returns, n)
+    GPD <- gpd(returns, threshold = t, method = c("ml"), information = c("observed"))
+    (prices[length(prices)]) * riskmeasures(GPD, q)[,"quantile"]
+  }
+}
+
 ## ---- Model evaluation
 
-evaluate_model <- function(model, lookback="4 quarters") {
-  vars <- index(price)[-(1:200)] %>%
+evaluate_model <- function(model, lookback="4 quarters", skip=200) {
+  vars <- index(price)[-(1:skip)] %>%
     lapply(function(date)price[paste0("/",date)]) %>%
     lapply(function(prices) {
       date <- index(prices)[length(prices)] %>% as.Date
@@ -66,4 +74,12 @@ empirical_var <- evaluate_model(empirical(99E-2))
 empirical_var %>% plotXTS
 (empirical_var/price) %>% plotXTS
 
-merge.xts((empirical_var/price), (delta_normal_var/price)) %>% plotXTS
+
+evt_var <- evaluate_model(evt(99E-2),"5 years",800)
+
+evt_var %>% plotXTS
+(evt_var/price) %>% plotXTS
+
+
+
+merge.xts((evt_var/price), (empirical_var/price), (delta_normal_var/price)) %>% plotXTS
