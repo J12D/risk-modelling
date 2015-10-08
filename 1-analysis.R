@@ -4,7 +4,22 @@ library(ggplot2)
 source("0-data.R")
 
 
-res <- garchFit(~garch(1, 1), data = returns$continuous)
+## ---- GARCH
+
+garch <- function(q=99.9E-2) {
+  function(prices) {
+    returns <- prices %>% ROC(type = "discrete") %>% na.omit
+    res <- capture.output(garchFit(~garch(1,1), data = returns), file='/dev/null')
+    forecast <- predict(res,1)
+    mu <- forecast$meanForecast %>% as.numeric
+    sigma <- forecast$standardDeviation %>% as.numeric
+    print(mu)
+    print(sigma)
+    print(qnorm(1 - q, mu, sigma))
+    -(prices[length(prices)]) * qnorm(1 - q, mu, sigma)
+  }
+}
+
 #plot(res) #look at some plots
 
 qplot(returns %>% as.vector, geom = "histogram", xlim = c(-0.25,0.25), binwidth = 0.005)
@@ -80,6 +95,12 @@ evt_var <- evaluate_model(evt(99E-2), "4 years", 800)
 evt_var %>% plotXTS
 (evt_var/price) %>% plotXTS
 
+garch_var <- evaluate_model(garch(99E-2), "4 years", 800)
 
+garch_var %>% plotXTS
+(garch_var/price) %>% plotXTS
 
-merge.xts((evt_var/price), (empirical_var/price), (delta_normal_var/price)) %>% plotXTS
+vars <- merge.xts((evt_var/price), (empirical_var/price), (delta_normal_var/price))
+colnames(vars) <- c("EVT", "Historical", "DeltaNormal")
+vars %>% plotXTS(size = 1)
+vars %>% plotTable("plot-data/vars")
