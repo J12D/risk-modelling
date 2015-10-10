@@ -12,10 +12,11 @@ blockMaxima <- function(price) {
   attr(SwissAirReturns,"times") = as.POSIXct(index(returns))
   
   #Calculation of losses
-  SwissAirLoss <- -1.0 * SwissAirReturns * 100.0
+  SwissAirLoss <- -1.0 * SwissAirReturns
   
   #Plot block maxima
   SwissAirGEV <- gev(SwissAirLoss,block = "month")
+  
   plot(
     SwissAirGEV$data,type = "h",col = "blue",xlab = "",ylab = "BlockMaxima",main =
       "Maximum monthly losses"
