@@ -1,6 +1,10 @@
 library(fGarch)
 library(magrittr)
 library(ggplot2)
+library(evir)
+library(ismev)
+library(fExtremes)
+
 source("0-data.R")
 
 
@@ -21,7 +25,9 @@ garch <- function(q=99.9E-2) {
     forecast <- predict(res,1)
     mu <- forecast$meanForecast %>% as.numeric
     sigma <- forecast$standardDeviation %>% as.numeric
-    -(prices[length(prices)]) * qnorm(1 - q, mu, sigma)
+    f <- -(prices[length(prices)]) * qnorm(1 - q, mu, sigma)
+    colnames(f) <- c("garch")
+    f
   }
 }
 
@@ -32,7 +38,9 @@ delta_normal <- function(q=99.9E-2) {
     returns <- prices %>% ROC(type = "discrete") %>% na.omit
     mu <- returns %>% mean
     sigma <- returns %>% sd
-    -(prices[length(prices)]) * qnorm(1 - q, mu, sigma)
+    f <- -(prices[length(prices)]) * qnorm(1 - q, mu, sigma)
+    colnames(f) <- c("delta-normal")
+    f
   }
 }
 
@@ -42,11 +50,28 @@ delta_normal <- function(q=99.9E-2) {
 empirical <- function(q=99.9E-2) {
   function(prices) {
     returns <- prices %>% ROC(type = "discrete") %>% na.omit
-    price_today <- prices[length(prices)]
-    (-price_today * returns) %>% quantile(q)
+    price_today <- prices[length(prices)] %>% as.numeric
+    f <- quantile(-price_today * returns, q)
+    f <- xts(f, index(prices) %>% last)
+    colnames(f) <- c("empricial")
+    f
   }
 }
 
+
+## ---- Extreme Value Theory
+
+evt <- function(q=99.9E-2) {
+  function(prices) {
+    losses <- prices %>% ROC(type = "discrete") %>% na.omit %>% -.
+    n <- round(length(prices) * (1 - (q - 1E-2)), 0)
+    t <- findthresh(losses, n)
+    GPD <- gpd(losses, threshold = t, method = c("ml"), information = c("observed"))
+    f <- (prices[length(prices)]) * riskmeasures(GPD, q)[,"quantile"]
+    colnames(f) <- c("evt")
+    f
+  }
+}
 
 ## ---- EWMA --------------------
 
@@ -54,14 +79,18 @@ ewma <- function(q=99.9E-2, lambda=0.94) {
   function(prices) {
     returns <- prices %>% ROC %>% na.omit
     price_today <- prices[length(prices)]
-    vol <- (1-lambda) * lambda ^ ((length(returns) - 1):0) %*% returns^2
-    #(-price_today * returns) %>% quantile(q)
+    weights <- (1 - lambda) * lambda ^ ((length(returns) - 1):0)
+    mu <- returns %>% mean
+    sigma <- sum(weights * (returns ^ 2))
+    f <- -price_today * qnorm(1 - q, mu, sigma)
+    colnames(f) <- c("ewma")
+    f
   }
 }
 
 ## ---- Model evaluation ---------------
 
-evaluate_model <- function(model, lookback = "1 year", skip = 200) {
+evaluate_model <- function(price, model, lookback = "1 year", skip = 200) {
   vars <- index(price) %>%
     .[-(1:skip)] %>%
     lapply(function(date) price[paste0("/",date)]) %>%
@@ -78,22 +107,24 @@ evaluate_model <- function(model, lookback = "1 year", skip = 200) {
 
 ## ---- Work with models ---------------
 
-funs <- list(delta_normal, empirical, evt, garch)
-results <- funs %>% lapply(function(model)evaluate_model(model(99E-2), "4 years", 800))
+eval_price <- function(price, funs = list(delta_normal, empirical, evt, garch, ewma)) {
+  results <- funs %>% lapply(function(model)evaluate_model(price, model(99E-2), "4 years", 800)/price)
+  results %<>% Reduce(merge.xts, .)
+  results
+}
 
-delta_normal_var <- evaluate_model(delta_normal(99E-2),"3 years")
-(delta_normal_var/price) %>% chartSeries
+write_vars <- function(vars, filename) {
+  colnames(vars) <- c("DeltaNormal", "Historical", "EVT", "GARCH", "EWMA")
+  vars %>% plotXTS(size = 1)
+  vars %>% plotTable(filename)
+}
 
-empirical_var <- evaluate_model(empirical(99E-2))
-(empirical_var/price) %>% plotXTS
+price %>% eval_price %>% write_vars("plot-data/vars")
+price %>% plotTable("plot-data/price")
 
-evt_var <- evaluate_model(evt(99E-2), "4 years", 800)
-(evt_var/price) %>% plotXTS
 
-garch_var <- evaluate_model(garch(99E-2), "4 years", 800)
-(garch_var/price) %>% plotXTS
+lehman %>% eval_price %>% plotXTS #write_vars("plot-data/leh_vars")
+lehman %>% plotTable("plot-data/lehman")
 
-vars <- merge.xts((evt_var/price), (empirical_var/price), (delta_normal_var/price), (garch_var/price))
-colnames(vars) <- c("EVT", "Historical", "DeltaNormal", "GARCH")
-vars %>% plotXTS(size = 1)
-vars %>% plotTable("plot-data/vars")
+united %>% eval_price %>% write_vars("plot-data/united_vars")
+united %>% plotTable("plot-data/united")
