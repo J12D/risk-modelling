@@ -71,95 +71,91 @@
 %7.	02/10/2001 - Fleet grounded due to insolvency
 %8.	09/10/2001 - Swiss govt injects CHF 1.6bn
 
-%\begin{varplot}
-%\addplot[color=color1] table[x=time, y=value.EVT] {vars.txt};
-%\addlegendentry{EVT}
-%\addplot[color=color2] table[x=time, y=value.Historical] {vars.txt};
-%\addlegendentry{Historical}
-%\addplot[color=color3] table[x=time, y=value.DeltaNormal] {vars.txt};
-%\addlegendentry{Delta-Normal}
-%\addplot[color=color4] table[x=time, y=value.GARCH] {vars.txt};
-%\addlegendentry{GARCH}
-%\end{varplot}
+\begin{varplot}
+\addplot[color=color1] table[x=time, y=value.EVT] {vars.txt};
+\addlegendentry{EVT}
+\addplot[color=color2] table[x=time, y=value.Historical] {vars.txt};
+\addlegendentry{Historical}
+\addplot[color=color3] table[x=time, y=value.DeltaNormal] {vars.txt};
+\addlegendentry{Delta-Normal}
+\addplot[color=color4] table[x=time, y=value.GARCH] {vars.txt};
+\addlegendentry{GARCH}
+\end{varplot}
 
-%\begin{varplot}
-%\addplot[color=color1] table[x=time, y=value.EVT] {vars.txt};
-%\addlegendentry{EVT}
-%\end{varplot}
+\begin{varplot}
+\addplot[color=color1] table[x=time, y=value.EVT] {vars.txt};
+\addlegendentry{EVT}
+\end{varplot}
 
-%\begin{varplot}
-%\addplot[color=color2] table[x=time, y=value.Historical] {vars.txt};
-%\addlegendentry{Historical}
-%\end{varplot}
+\begin{varplot}
+\addplot[color=color2] table[x=time, y=value.Historical] {vars.txt};
+\addlegendentry{Historical}
+\end{varplot}
 
-%\begin{varplot}
-%\addplot[color=color3] table[x=time, y=value.DeltaNormal] {vars.txt};
-%\addlegendentry{Delta-Normal}
-%\end{varplot}
+\begin{varplot}
+\addplot[color=color3] table[x=time, y=value.DeltaNormal] {vars.txt};
+\addlegendentry{Delta-Normal}
+\end{varplot}
 
-%\begin{varplot}
-%\addplot[color=color4] table[x=time, y=value.GARCH] {vars.txt};
-%\addlegendentry{GARCH}
-%\end{varplot}
+\begin{varplot}
+\addplot[color=color4] table[x=time, y=value.GARCH] {vars.txt};
+\addlegendentry{GARCH}
+\end{varplot}
 
+\begin{tikzpicture}
+  \node at(0,0) {Lehman};
+\end{tikzpicture}
 
+\begin{tikzpicture}
+\begin{axis}[
+    no marks,
+    date coordinates in=x,
+    xticklabel=\year,
+    yticklabel style={/pgf/number format/.cd,fixed,precision=2},
+    ylabel=price,
+    xlabel=time,
+    every axis plot/.append style={thick, smooth}]
+    \addplot table[x=time, y=value] {lehman.txt};
+\end{axis}
+\end{tikzpicture}
 
-%\begin{tikzpicture}
-%\begin{axis}[
-		%no marks,
-		%date coordinates in=x,
-		%xticklabel=\year,
-    %yticklabel style={/pgf/number format/.cd,fixed,precision=2},
-		%ylabel=price,
-		%xlabel=time,
-    %every axis plot/.append style={thick, smooth}]
-    %\addplot table[x=time, y=value] {lehman.txt};
-%\end{axis}
-%\end{tikzpicture}
+\begin{varplot}
+\addplot[color=color1] table[x=time, y=value.EVT] {leh_vars.txt};
+\addlegendentry{EVT}
+\addplot[color=color2] table[x=time, y=value.Historical] {leh_vars.txt};
+\addlegendentry{Historical}
+\addplot[color=color3] table[x=time, y=value.DeltaNormal] {leh_vars.txt};
+\addlegendentry{Delta-Normal}
+\addplot[color=color4] table[x=time, y=value.GARCH] {leh_vars.txt};
+\addlegendentry{GARCH}
+\end{varplot}
 
-%\begin{varplot}
-%\addplot[color=color1] table[x=time, y=value.EVT] {leh_vars.txt};
-%\addlegendentry{EVT}
-%\addplot[color=color2] table[x=time, y=value.Historical] {leh_vars.txt};
-%\addlegendentry{Historical}
-%\addplot[color=color3] table[x=time, y=value.DeltaNormal] {leh_vars.txt};
-%\addlegendentry{Delta-Normal}
-%\addplot[color=color4] table[x=time, y=value.GARCH] {leh_vars.txt};
-%\addlegendentry{GARCH}
-%\end{varplot}
+\begin{tikzpicture}
+  \node at(0,0) {United};
+\end{tikzpicture}
 
+\begin{tikzpicture}
+\begin{axis}[
+    no marks,
+    date coordinates in=x,
+    xticklabel=\year,
+    yticklabel style={/pgf/number format/.cd,fixed,precision=2},
+    ylabel=price,
+    xlabel=time, 
+    every axis plot/.append style={thick, smooth}]
+    \addplot table[x=time, y=value] {united.txt};
+\end{axis}
+\end{tikzpicture}
 
-%\begin{tikzpicture}
-%\begin{axis}[
-		%no marks,
-		%date coordinates in=x,
-		%xticklabel=\year,
-    %yticklabel style={/pgf/number format/.cd,fixed,precision=2},
-		%ylabel=price,
-		%xlabel=time,
-    %every axis plot/.append style={thick, smooth}]
-    %\addplot table[x=time, y=value] {united.txt};
-%\end{axis}
-%\end{tikzpicture}
-
-%\begin{varplot}
-%\addplot[color=color1] table[x=time, y=value.EVT] {united_vars.txt};
-%\addlegendentry{EVT}
-%\addplot[color=color2] table[x=time, y=value.Historical] {united_vars.txt};
-%\addlegendentry{Historical}
-%\addplot[color=color3] table[x=time, y=value.DeltaNormal] {united_vars.txt};
-%\addlegendentry{Delta-Normal}
-%\addplot[color=color4] table[x=time, y=value.GARCH] {united_vars.txt};
-%\addlegendentry{GARCH}
-%\end{varplot}
+\begin{varplot}
+\addplot[color=color1] table[x=time, y=value.EVT] {united_vars.txt};
+\addlegendentry{EVT}
+\addplot[color=color2] table[x=time, y=value.Historical] {united_vars.txt};
+\addlegendentry{Historical}
+\addplot[color=color3] table[x=time, y=value.DeltaNormal] {united_vars.txt};
+\addlegendentry{Delta-Normal}
+\addplot[color=color4] table[x=time, y=value.GARCH] {united_vars.txt};
+\addlegendentry{GARCH}
+\end{varplot}
 
 \end{document}
-1.	01/11/1997 - “Hunter strategy” accepted by board
-2.	01/01/2001 - CEO ousted 
-3.	02/04/2001 - CHF 2.9bn loss announced
-4.	26/09/2001 - Rating downgraded by Moody’s
-5.	01/10/2001 - Delays in payment announced
-6.	02/10/2001 - Banks cut credit lines. Swiss govt injects CHF 0.5bn
-7.	02/10/2001 - Fleet grounded due to insolvency
-8.	09/10/2001 - Swiss govt injects CHF 1.6bn
-
