@@ -2,6 +2,7 @@ library(readxl)
 library(dplyr)
 library(magrittr)
 library(quantmod)
+library(lubridate)
 source("0-helper.R")
 Sys.setenv(tz = "UTC")
 
@@ -30,5 +31,22 @@ returns1 <- returns['1996-08-02/2001-10-29']$discrete
 
 price$Last %>% chartSeries
 returns$discrete %>% chartSeries
+
+read_kunal_data <- function(file, format, skip=0) {
+  d <- read_excel(file, skip = skip)
+  d <- xts(d[,3], d[,2][[1]] %>% parse_date_time(format))
+}
+
+# ---- Airline Index ----------------------------------------
+xal <- read.csv("data/XAL Data.csv", sep = ";", na.strings = "--")
+xal <- xts(xal[,"Close"], xal[,1] %>% parse_date_time("%d-%b-%Y"))
+
+## ---- Lehman ---------------------------------------
+lehman <- read_excel("data/Lehman-Updated.xlsx") %>% as.data.frame
+lehman <- xts(lehman[,6], lehman[,2] %>% parse_date_time("%Y/%m/%d"))
+
+## ---- United ------------------------------------------
+united <- read_excel("data/United Airlines-Updated.xlsx") %>% as.data.frame
+united <- xts(united[,6], united[,2] %>% parse_date_time("%Y/%m/%d"))
 
 message("Imported data --------------------------")
