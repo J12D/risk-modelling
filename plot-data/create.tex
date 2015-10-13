@@ -158,4 +158,40 @@
 \addlegendentry{GARCH}
 \end{varplot}
 
+\begin{tikzpicture}
+\begin{axis}[
+    no marks,
+    date coordinates in=x,
+    xticklabel=\year,
+    yticklabel style={/pgf/number format/.cd,fixed,precision=2},
+    ylabel=Swiss Air log returns,
+    xlabel=time, 
+    xmin = 1999-01-01,
+    xtick={
+      {1999-06-01},
+      {2000-06-01},
+      {2001-06-01}
+    },
+    every axis plot/.append style={thick, smooth}]
+    \addplot table[x=time, y=value.continuous] {garchRealized.txt};
+\end{axis}
+\end{tikzpicture}
+\begin{tikzpicture}
+\begin{axis}[
+    no marks,
+    date coordinates in=x,
+    xticklabel=\year,
+    yticklabel style={/pgf/number format/.cd,fixed,precision=2},
+    ylabel=Swiss Air GARCH volatility,
+    xlabel=time, 
+    xmin = 1999-01-01,
+    xtick={
+      {1999-06-01},
+      {2000-06-01},
+      {2001-06-01}
+    },
+    every axis plot/.append style={thick, smooth}]
+    \addplot table[x=time, y=value.garch] {garchRealized.txt};
+\end{axis}
+\end{tikzpicture}
 \end{document}
