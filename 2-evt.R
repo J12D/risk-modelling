@@ -19,7 +19,7 @@ blockMaxima <- function(price) {
   SwissAirGEV <- gev(SwissAirLoss,block = 21)
   
   plot(
-    SwissAirGEV$data,type = "h",col = "blue",xlab = "",ylab = "BlockMaxima",main =
+    SwissAirGEV$data,type = "h",col = "blue",xlab = "Months",ylab = "Block Maxima",main =
       "Maximum monthly losses"
   )
   
