@@ -39,8 +39,8 @@ read_kunal_data <- function(file, format, skip=0) {
 
 # ---- Airline Index ----------------------------------------
 #xal <- getSymbols("^XAL", auto.assign = F, from = "1990-01-01")# read.csv("data/XAL Data.csv", sep = ";", na.strings = "--")
-#xal <- xal[,"XAL.Adjusted"] #saveRDS(xal, "xal")
-xal <- readRDS("xal")
+#xal <- xal[,"XAL.Adjusted"] #saveRDS(xal, "data/xal")
+xal <- readRDS("data/xal")
 returns_xal <- xts(NULL)
 returns_xal$continuous <- ROC(xal)
 returns_xal$discrete <- ROC(xal, type = "discrete")
