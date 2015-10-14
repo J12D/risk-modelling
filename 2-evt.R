@@ -6,16 +6,17 @@ blockMaxima <- function(price) {
   #Get arithmetic returns
   returns <- price %>% ROC(type = "discrete") %>% na.omit
   
+  
   #Transform data in POSIXct data format
   SwissAirReturns <- returns
   SwissAirReturns <- coredata(returns[,1])
   attr(SwissAirReturns,"times") = as.POSIXct(index(returns))
-  
+
   #Calculation of losses
   SwissAirLoss <- -1.0 * SwissAirReturns
   
   #Plot block maxima
-  SwissAirGEV <- gev(SwissAirLoss,block = "month")
+  SwissAirGEV <- gev(SwissAirLoss,block = 21)
   
   plot(
     SwissAirGEV$data,type = "h",col = "blue",xlab = "",ylab = "BlockMaxima",main =
@@ -66,3 +67,21 @@ blockMaxima <- function(price) {
   SwissAirOrderFit <- rlarg.fit(SwissAirOrder)
   rlarg.diag(SwissAirOrderFit)
 }
+# Swissair
+print("1996-08-02/1999-12-31")
+blockMaxima(price0)
+print("1996-08-02/2001-08-31")
+blockMaxima(price1)
+
+# Airline Index
+print("1996-08-02/1999-12-31")
+blockMaxima(price0_xal)
+print("1996-08-02/2001-08-31")
+blockMaxima(price1_xal)
+
+# United Airlines
+print("1996-08-02/1999-12-31")
+blockMaxima(price0_united)
+print("1996-08-02/2001-08-31")
+blockMaxima(price1_united)
+
