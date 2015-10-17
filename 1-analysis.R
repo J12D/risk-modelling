@@ -8,7 +8,7 @@ library(fExtremes)
 source("0-data.R")
 
 ## ---- Get volatilities from GARCH model ----
-garch_vol <- function(q=99.9E-2) {
+garch_vol_yearly <- function(q=99.9E-2) {
   function(prices) {
     returns <- prices %>% ROC(type = "discrete") %>% na.omit
     res <- garchFit(~garch(1,1), data = returns, trace = F)
@@ -19,6 +19,18 @@ garch_vol <- function(q=99.9E-2) {
     sigma
   }
 }
+
+garch_vol_daily <- function(q=99.9E-2) {
+  function(prices) {
+    returns <- prices %>% ROC(type = "discrete") %>% na.omit
+    res <- garchFit(~garch(1,1), data = returns, trace = F)
+    forecast <- predict(res, 1)
+    sigma <- forecast$standardDeviation
+    sigma
+  }
+}
+
+
 
 ## ---- GARCH ---------------
 

@@ -118,18 +118,17 @@ blockMaxima(price1_united, "graphs/ual1")
 library(evir)
 library(fExtremes)
 
-##-----input:vol_garch---------
-vol_garch <-
-  
-  ##-----innovations------------
-Z <- returns/vol_garch
+## ---- input:vol_garch ----
+vol_garch_daily <- evaluate_model(price,garch_vol_daily(99E-2), "4 quarters", 200)
 
-##----Fit innovations into GPD----
+## ---- innovations ------------
+aggr <- merge.xts(vol_garch_daily, returns) %>% na.omit
+Z <- aggr$continuous/aggr$vol_garch_daily
+
+## ---- Fit innovations into GPD----
 q <-  0.99
 
-GPD_Z <- gpd(Z, threshold = findthresh(Z, round(length(prices) * (1 - (q - 1E-2)), 0)), 
-             method = c("ml"), information=c("observed"))
+GPD_Z <- gpd(Z, threshold = findthresh(Z, round(length(Z) * (1 - (q - 1E-2)), 0)), 
+             method = c("ml"), information = c("observed"))
 
-riskmeasures(GPD_Z, q)
-
-##----VaR------------
+quantile <- riskmeasures(GPD_Z, q)[,"quantile"] %>% as.numeric
