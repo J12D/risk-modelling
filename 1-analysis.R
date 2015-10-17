@@ -7,14 +7,18 @@ library(fExtremes)
 
 source("0-data.R")
 
-
-## ---- General Analysis ---------------
-par(ask = F)
-price %>% chartSeries
-returns['/2001-10-29']$discrete %>% plotXTS
-
-qplot(returns %>% as.vector, geom = "histogram", xlim = c(-0.25,0.25), binwidth = 0.005)
-
+## ---- Get volatilities from GARCH model ----
+garch_vol <- function(q=99.9E-2) {
+  function(prices) {
+    returns <- prices %>% ROC(type = "discrete") %>% na.omit
+    res <- garchFit(~garch(1,1), data = returns, trace = F)
+    forecast <- predict(res, 252)
+    sigma <- forecast$standardDeviation ^ 2 %>% sum %>% sqrt
+    # forecast <- predice(res, 1)
+    # sigma <- forecast$standardDeviation
+    sigma
+  }
+}
 
 ## ---- GARCH ---------------
 
@@ -118,13 +122,3 @@ write_vars <- function(vars, filename) {
   vars %>% plotXTS(size = 1)
   vars %>% plotTable(filename)
 }
-
-price %>% eval_price %>% write_vars("plot-data/vars")
-price %>% plotTable("plot-data/price")
-
-
-lehman %>% eval_price %>% plotXTS #write_vars("plot-data/leh_vars")
-lehman %>% plotTable("plot-data/lehman")
-
-united %>% eval_price %>% write_vars("plot-data/united_vars")
-united %>% plotTable("plot-data/united")

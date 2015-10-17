@@ -26,12 +26,6 @@ price1 %>% chartSeries
 returns0 <- returns['1996-08-02/1999-12-31']$discrete
 returns1 <- returns['1996-08-02/2001-08-31']$discrete
 
--returns0 %>% chartSeries
--returns1 %>% plotXTS(ylim = c(-0.5,1))
-
-price$Last %>% chartSeries
-returns$discrete %>% chartSeries
-
 read_kunal_data <- function(file, format, skip=0) {
   d <- read_excel(file, skip = skip)
   d <- xts(d[,3], d[,2][[1]] %>% parse_date_time(format))

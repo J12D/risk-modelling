@@ -2,7 +2,9 @@ library(evir)
 library(ismev)
 library(fExtremes)
 
-blockMaxima <- function(price) {
+source("1-analysis.R")
+
+blockMaxima <- function(price, filename = "") {
   #Get arithmetic returns
   returns <- price %>% ROC(type = "discrete") %>% na.omit
   
@@ -17,19 +19,35 @@ blockMaxima <- function(price) {
   
   #Plot block maxima
   SwissAirGEV <- gev(SwissAirLoss,block = 21)
-  
+  png(
+    paste0(filename,"max_monthly.png"),
+    width     = 3.25,
+    height    = 3.25,
+    units     = "in",
+    res       = 1200
+  )
   plot(
     SwissAirGEV$data,type = "h",col = "blue",xlab = "Months",ylab = "Block Maxima",main =
       "Maximum monthly losses"
   )
+  dev.off()
   
   #Plot diagnostic plots for fitted GEV model
   SwissAirGEV2 <- gev.fit(SwissAirGEV$data)
   gev.diag(SwissAirGEV2)
-  par(mfrow = c(2,1))
+  
+  png(
+    paste0(filename,"gev_4.png"),
+    width     = 3.25,
+    height    = 3.25,
+    units     = "in",
+    res       = 1200
+  )
   gev.prof(
     SwissAirGEV2,m = 20,xlow = 5,xup = 16,conf = 0.95
   )
+  dev.off()
+  
   gev.profxi(SwissAirGEV2,xlow = 0.0,xup = 0.7,conf = 0.95)
   mLoss <- max(SwissAirGEV$data)
   mYears <-
@@ -56,12 +74,21 @@ blockMaxima <- function(price) {
   colnames(SwissAirOrder) <- paste("r",1:r,sep = "")
   
   #Plot of order data
+  png(
+    paste0(filename,"_order.png"),
+    width     = 3.25,
+    height    = 3.25,
+    units     = "in",
+    res       = 1200
+  )
   plot(
     Yearu,SwissAirOrder[,1],col = "black",ylim = range(SwissAirOrder),ylab =
       "LossesSwissair(percentages)",xlab = "",
     pch = 21,bg = "black"
   )
+  
   points(Yearu,SwissAirOrder[,2],col = "grey",pch = 23,bg = "grey")
+  dev.off()
   
   #Fit and diagnostics
   SwissAirOrderFit <- rlarg.fit(SwissAirOrder)
@@ -69,19 +96,20 @@ blockMaxima <- function(price) {
 }
 # Swissair
 print("1996-08-02/1999-12-31")
-blockMaxima(price0)
+blockMaxima(price0,"graphs/0")
 print("1996-08-02/2001-08-31")
-blockMaxima(price1)
+blockMaxima(price1,"graphs/1")
 
 # Airline Index
 print("1996-08-02/1999-12-31")
-blockMaxima(price0_xal)
+blockMaxima(price0_xal, "graphs/xal0")
 print("1996-08-02/2001-08-31")
-blockMaxima(price1_xal)
+blockMaxima(price1_xal,"graphs/xal1")
 
 # United Airlines
 print("1996-08-02/1999-12-31")
-blockMaxima(price0_united)
+blockMaxima(price0_united, "graphs/ual0")
 print("1996-08-02/2001-08-31")
-blockMaxima(price1_united)
+blockMaxima(price1_united, "graphs/ual1")
+
 
