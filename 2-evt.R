@@ -113,3 +113,23 @@ print("1996-08-02/2001-08-31")
 blockMaxima(price1_united, "graphs/ual1")
 
 
+## GARCH + EVT
+
+library(evir)
+library(fExtremes)
+
+##-----input:vol_garch---------
+vol_garch <-
+  
+  ##-----innovations------------
+Z <- returns/vol_garch
+
+##----Fit innovations into GPD----
+q <-  0.99
+
+GPD_Z <- gpd(Z, threshold = findthresh(Z, round(length(prices) * (1 - (q - 1E-2)), 0)), 
+             method = c("ml"), information=c("observed"))
+
+riskmeasures(GPD_Z, q)
+
+##----VaR------------
