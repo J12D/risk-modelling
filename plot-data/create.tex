@@ -1,5 +1,6 @@
 \documentclass[tikz]{standalone}
 \usepackage{pgfplots}
+\usepackage{ marvosym }
 
 \pgfplotsset{compat=1.9}
 \usepgfplotslibrary{dateplot}
@@ -9,7 +10,7 @@
 \definecolor{color3}{rgb}{0.38,0.61,1}
 \definecolor{color4}{rgb}{0.78,0.486,1}
 
-\newenvironment{varplot}{
+\newenvironment{varplot}[1][]{
 \begin{tikzpicture}
 \begin{axis}[
 		no marks,
@@ -21,7 +22,8 @@
 		ylabel=VaR Estimate,
 		xlabel=time,
     legend pos = north west,
-    every axis plot/.append style={thick, smooth}]
+    every axis plot/.append style={thick, smooth},
+    #1]
 }{%
 \end{axis}
 \end{tikzpicture}
@@ -51,10 +53,37 @@
 		ylabel=price,
 		xlabel=time,
     xmin = 1996-08-02,
+    xmax = 2002-02-28,
+    every axis plot/.append style={thick, smooth}]
+    \addplot table[x=time, y=value] {price.txt};
+    \draw [fill] (axis cs:1996-8-2,0) circle (1pt);
+    \draw [fill] (axis cs:1999-12-31,0) circle (1pt);
+    \draw [fill] (axis cs:2001-8-31,0) circle (1pt);
+\end{axis}
+\end{tikzpicture}
+
+\begin{tikzpicture}
+\begin{axis}[
+		no marks,
+		date coordinates in=x,
+    xtick={
+      {1996-08-02},
+      {1997-06-01},
+      {1998-06-01},
+      {1999-06-01},
+      {2000-06-01},
+      {2001-06-01}
+    },
+		xticklabel=\year,
+    yticklabel style={/pgf/number format/.cd,fixed,precision=2},
+		ylabel=price,
+		xlabel=time,
+    xmin = 1996-08-02,
     xmax = 2003-06-29,
     every axis plot/.append style={thick, smooth}]
     \addplot table[x=time, y=value] {price.txt};
     \comment{1997-12-31}{190}{1997-11-01}{330}{Hunter strategy\\ accepted by board}
+    \comment{1999-12-31}{500}{1998-9-02}{380}{Crash: Swissair Flight 111}
     \comment{2001-01-01}{350}{2001-01-01}{280}{CEO ousted}
     \comment{2000-04-31}{150}{2001-04-02}{150}{CHF 2.9bn loss}
     \comment{2000-05-01}{50}{2001-10-01}{40}{Rating downgrade by Moody's}
@@ -82,24 +111,24 @@
 \addlegendentry{GARCH}
 \end{varplot}
 
-\begin{varplot}
-\addplot[color=color1] table[x=time, y=value.EVT] {vars.txt};
-\addlegendentry{EVT}
-\end{varplot}
-
-\begin{varplot}
+\begin{varplot}[width=10.5cm, height=7cm]
 \addplot[color=color2] table[x=time, y=value.Historical] {vars.txt};
 \addlegendentry{Historical}
 \end{varplot}
 
-\begin{varplot}
+\begin{varplot}[width=10.5cm, height=7cm]
 \addplot[color=color3] table[x=time, y=value.DeltaNormal] {vars.txt};
 \addlegendentry{Delta-Normal}
 \end{varplot}
 
-\begin{varplot}
+\begin{varplot}[width=10.5cm, height=10.5cm]
 \addplot[color=color4] table[x=time, y=value.GARCH] {vars.txt};
 \addlegendentry{GARCH}
+\end{varplot}
+
+\begin{varplot}[width=10.5cm, height=10.5cm]
+\addplot[color=color1] table[x=time, y=value.EVT] {vars.txt};
+\addlegendentry{EVT}
 \end{varplot}
 
 \begin{tikzpicture}
@@ -176,22 +205,53 @@
     \addplot table[x=time, y=value.continuous] {garchRealized.txt};
 \end{axis}
 \end{tikzpicture}
+
 \begin{tikzpicture}
 \begin{axis}[
-    no marks,
-    date coordinates in=x,
-    xticklabel=\year,
-    yticklabel style={/pgf/number format/.cd,fixed,precision=2},
-    ylabel=Swiss Air GARCH volatility,
-    xlabel=time, 
-    xmin = 1999-01-01,
-    xtick={
-      {1999-06-01},
-      {2000-06-01},
-      {2001-06-01}
-    },
-    every axis plot/.append style={thick, smooth}]
-    \addplot table[x=time, y=value.garch] {garchRealized.txt};
+  no marks,
+  date coordinates in=x,
+  xticklabel=\year,
+  yticklabel style={/pgf/number format/.cd,fixed,precision=2},
+  ylabel=Swiss Air GARCH volatility,
+  xlabel=time, 
+  xmin = 1999-01-01,
+  xtick={
+    {1999-06-01},
+    {2000-06-01},
+    {2001-06-01}
+  },
+  every axis plot/.append style={thick, smooth}]
+  \addplot table[x=time, y=value.garch] {garchRealized.txt};
 \end{axis}
 \end{tikzpicture}
+
+\begin{tikzpicture}
+\begin{axis}[
+  no marks,
+  date coordinates in=x,
+  xticklabel={\year-\month},
+  yticklabel=\pgfmathparse{100*\tick}\pgfmathprintnumber{\pgfmathresult}\,\%,
+  yticklabel style={/pgf/number format/.cd,fixed,precision=2},
+  ylabel=Probability of default Swiss Air,
+  xlabel=time, 
+  xmin = 1997-01-01,
+  xmax = 2001-11-15,
+  xtick={
+    {1997-03-01},
+    {1997-09-01},
+    {1998-03-01},
+    {1998-09-01},
+    {1999-03-01},
+    {1999-09-01},
+    {2000-03-01},
+    {2000-09-01},
+    {2001-03-01},
+    {2001-09-01}
+  },
+  every axis plot/.append style={thick, smooth}]
+  \addplot table[x=time, y=value] {pd.txt};
+  \comment{2001-07-01}{0.20}{2001-10-03}{0.62}{\raisebox{-.25\height}{\Large \Cross{}} Default}
+\end{axis}
+\end{tikzpicture}
+ 
 \end{document}
