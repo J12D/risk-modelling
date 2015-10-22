@@ -89,20 +89,6 @@ evt <- function(q=99.9E-2) {
   }
 }
 
-## ---- EWMA --------------------
-
-ewma <- function(q=99.9E-2, lambda=0.94) {
-  function(prices) {
-    returns <- prices %>% ROC %>% na.omit
-    price_today <- prices[length(prices)]
-    weights <- (1 - lambda) * lambda ^ ((length(returns) - 1):0)
-    mu <- returns %>% mean
-    sigma <- sum(weights * (returns ^ 2))
-    f <- -price_today * qnorm(1 - q, mu, sigma)
-    colnames(f) <- c("ewma")
-    f
-  }
-}
 
 ## ---- Model evaluation ---------------
 
